@@ -39,6 +39,52 @@ use TASoft\Util\PDO;
 
 abstract class AbstractPDO extends PDO
 {
+    private $configuration;
+
     const ARGUMENT_USERNAME = 'username';
     const ARGUMENT_PASSWORD = 'password';
+
+    const CONFIG_TABLE_PREFIX = 'prefix';
+
+    public function setConfiguration($config) {
+        $this->configuration = $config;
+    }
+
+    protected function resolveSQLTablePrefix(string $sql): string {
+        $prefix = $this->configuration[ static::CONFIG_TABLE_PREFIX ] ?? 'SKY_';
+
+        $sql = preg_replace("/SKY_([A-Z_]+)/", "$prefix$1", $sql);
+
+        return $sql;
+    }
+
+    public function select(string $sql, array $arguments = [])
+    {
+        $sql = $this->resolveSQLTablePrefix($sql);
+        return parent::select($sql, $arguments);
+    }
+
+    public function selectWithObjects(string $sql, array $arguments = [])
+    {
+        $sql = $this->resolveSQLTablePrefix($sql);
+        return parent::selectWithObjects($sql, $arguments);
+    }
+
+    public function injectWithObjects(string $sql)
+    {
+        $sql = $this->resolveSQLTablePrefix($sql);
+        parent::injectWithObjects($sql);
+    }
+
+    public function inject(string $sql)
+    {
+        $sql = $this->resolveSQLTablePrefix($sql);
+        parent::inject($sql);
+    }
+
+    public function count(string $sql, array $arguments = []): int
+    {
+        $sql = $this->resolveSQLTablePrefix($sql);
+        return parent::count($sql, $arguments);
+    }
 }

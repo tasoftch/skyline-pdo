@@ -38,6 +38,7 @@ use Skyline\PDO\SQLite;
 return [
     'pdo.primary' => MySQL::SERVICE_NAME,
     'pdo.secondary' => SQLite::SERVICE_NAME,
+    "pdo.prefix" => 'SKY_',
 
     'pdo.mysql.host' => 'localhost',
     'pdo.mysql.dataBase' => '',

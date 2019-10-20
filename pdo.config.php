@@ -56,6 +56,9 @@ return [
                 MySQL::ARGUMENT_USERNAME => '%pdo.mysql.username%',
                 MySQL::ARGUMENT_PASSWORD => '%pdo.mysql.password%',
                 MySQL::ARGUMENT_SOCKET => '%pdo.mysql.socket%'
+            ],
+            AbstractFileConfiguration::SERVICE_INIT_CONFIGURATION => [
+                MySQL::CONFIG_TABLE_PREFIX => '%pdo.prefix%'
             ]
         ],
 
@@ -65,6 +68,9 @@ return [
                 SQLite::ARGUMENT_FILENAME => '%pdo.sqlite.filename%',
                 SQLite::ARGUMENT_USERNAME => '%pdo.sqlite.username%',
                 SQLite::ARGUMENT_PASSWORD => '%pdo.sqlite.password%',
+            ],
+            AbstractFileConfiguration::SERVICE_INIT_CONFIGURATION => [
+                SQLite::CONFIG_TABLE_PREFIX => '%pdo.prefix%'
             ]
         ]
     ]
