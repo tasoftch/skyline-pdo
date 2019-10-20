@@ -32,39 +32,19 @@
  *
  */
 
-namespace Skyline\PDO\Compiler;
+namespace Skyline\PDO\Compiler\Structure\Table;
 
+use Skyline\PDO\Compiler\Structure\ObjectInterface;
 
-use Skyline\Compiler\AbstractCompiler;
-use Skyline\Compiler\CompilerContext;
-use Skyline\PDO\Compiler\Structure\Table\TableInterface;
-
-class PDOCompiler extends AbstractCompiler
+/**
+ * Describes a table
+ *
+ * @package Skyline\PDO\Compiler\Structure
+ */
+interface TableInterface extends ObjectInterface
 {
-    public function compile(CompilerContext $context)
-    {
-        $collectedTables = [];
-
-        foreach($context->getSourceCodeManager()->yieldSourceFiles("/\.sql$/i") as $source) {
-            $tables = silent_include($source);
-            if(is_iterable($tables)) {
-                foreach($tables as $table) {
-                    if($table instanceof TableInterface) {
-                        $collectedTables[ $table->getName() ][] = $table;
-                    }
-                }
-            }
-        }
-
-
-    }
-
-    public function getCompilerName(): string
-    {
-        return "PDO Compiler";
-    }
-}
-
-function silent_include($source) {
-    return require $source;
+    /**
+     * @return ObjectInterface[]
+     */
+    public function getFieldObjects(): array;
 }

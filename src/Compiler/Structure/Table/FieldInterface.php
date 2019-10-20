@@ -32,39 +32,51 @@
  *
  */
 
-namespace Skyline\PDO\Compiler;
+namespace Skyline\PDO\Compiler\Structure\Table;
 
 
-use Skyline\Compiler\AbstractCompiler;
-use Skyline\Compiler\CompilerContext;
-use Skyline\PDO\Compiler\Structure\Table\TableInterface;
+use Skyline\PDO\Compiler\Structure\ObjectInterface;
 
-class PDOCompiler extends AbstractCompiler
+interface FieldInterface extends ObjectInterface
 {
-    public function compile(CompilerContext $context)
-    {
-        $collectedTables = [];
-
-        foreach($context->getSourceCodeManager()->yieldSourceFiles("/\.sql$/i") as $source) {
-            $tables = silent_include($source);
-            if(is_iterable($tables)) {
-                foreach($tables as $table) {
-                    if($table instanceof TableInterface) {
-                        $collectedTables[ $table->getName() ][] = $table;
-                    }
-                }
-            }
-        }
+    const TYPE_INTEGER = 'INTEGER';
+    const TYPE_STRING = 'VARCHAR';
+    const TYPE_TEXT = 'TEXT';
+    const TYPE_DATE = 'DATE';
+    const TYPE_DATE_TIME = 'DATETIME';
 
 
-    }
+    /**
+     * @return string
+     * @see FieldInterface::TYPE_* constants
+     */
+    public function getValueType(): string;
 
-    public function getCompilerName(): string
-    {
-        return "PDO Compiler";
-    }
-}
+    /**
+     * The maximal length of a value. (basically used with TYPE_VARCHAR)
+     * Return 0 to ignore
+     *
+     * @return int
+     */
+    public function getLength(): int;
 
-function silent_include($source) {
-    return require $source;
+    /**
+     * Allows NULL or not
+     *
+     * @return bool
+     */
+    public function allowsNull(): bool;
+
+    /**
+     * Returns true, if the field accepts a default value
+     * @return bool
+     */
+    public function hasDefaultValue(): bool;
+
+    /**
+     * The default value.
+     *
+     * @return mixed
+     */
+    public function getDefaultValue();
 }

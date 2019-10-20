@@ -32,39 +32,27 @@
  *
  */
 
-namespace Skyline\PDO\Compiler;
+namespace Skyline\PDO\Compiler\Structure;
 
-
-use Skyline\Compiler\AbstractCompiler;
-use Skyline\Compiler\CompilerContext;
-use Skyline\PDO\Compiler\Structure\Table\TableInterface;
-
-class PDOCompiler extends AbstractCompiler
+/**
+ * The structure objects are used to describe the data base.
+ * The compiler will check, if the data base matches to the required descriptions.
+ *
+ * @package Skyline\PDO\Compiler\Structure
+ */
+interface ObjectInterface
 {
-    public function compile(CompilerContext $context)
-    {
-        $collectedTables = [];
+    /**
+     * The name of the object
+     *
+     * @return string
+     */
+    public function getName(): string;
 
-        foreach($context->getSourceCodeManager()->yieldSourceFiles("/\.sql$/i") as $source) {
-            $tables = silent_include($source);
-            if(is_iterable($tables)) {
-                foreach($tables as $table) {
-                    if($table instanceof TableInterface) {
-                        $collectedTables[ $table->getName() ][] = $table;
-                    }
-                }
-            }
-        }
-
-
-    }
-
-    public function getCompilerName(): string
-    {
-        return "PDO Compiler";
-    }
-}
-
-function silent_include($source) {
-    return require $source;
+    /**
+     * If this returns true, than the compiler will not try to create the object, if it does not exist.
+     *
+     * @return bool
+     */
+    public function isOptional(): bool;
 }
