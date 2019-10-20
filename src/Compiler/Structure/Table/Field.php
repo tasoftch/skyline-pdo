@@ -39,18 +39,16 @@ class Field implements FieldInterface
 {
     /** @var string */
     private $name;
-    /** @var bool */
-    private $optional;
     /** string */
     private $valueType;
     /** @var int */
     private $length;
-    /** @var bool */
-    private $allowsNull;
-    /** @var bool */
-    private $hasDefaultValue;
     /** @var mixed */
     private $defaultValue;
+    /** @var int */
+    private $attributes;
+
+    public static $defaultAttributes = self::ATTR_ALLOWS_NULL;
 
     /**
      * Field constructor.
@@ -62,15 +60,14 @@ class Field implements FieldInterface
      * @param bool $hasDefaultValue
      * @param mixed $defaultValue
      */
-    public function __construct(string $name, bool $optional = false, $valueType = self::TYPE_TEXT, int $length = 0, bool $allowsNull = true, bool $hasDefaultValue = true, $defaultValue = NULL)
+    public function __construct(string $name, $valueType = self::TYPE_TEXT, int $length = 0, int $attributes = 0, $defaultValue = NULL)
     {
         $this->name = $name;
-        $this->optional = $optional;
         $this->valueType = $valueType;
         $this->length = $length;
-        $this->allowsNull = $allowsNull;
-        $this->hasDefaultValue = $hasDefaultValue;
         $this->defaultValue = $defaultValue;
+
+        $this->attributes = $attributes;
     }
 
 
@@ -87,7 +84,7 @@ class Field implements FieldInterface
      */
     public function isOptional(): bool
     {
-        return $this->optional;
+        return $this->attributes & self::ATTR_OPTIONAL ? true : false;
     }
 
     /**
@@ -111,7 +108,7 @@ class Field implements FieldInterface
      */
     public function allowsNull(): bool
     {
-        return $this->allowsNull;
+        return $this->attributes & self::ATTR_ALLOWS_NULL ? true : false;
     }
 
     /**
@@ -119,7 +116,36 @@ class Field implements FieldInterface
      */
     public function hasDefaultValue(): bool
     {
-        return $this->hasDefaultValue;
+        return $this->attributes & self::ATTR_HAS_DEFAULT ? true : false;
+    }
+
+    /**
+     * @return int
+     */
+    public function getAttributes(): int
+    {
+        return $this->attributes;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIndexed(): bool {
+        return $this->attributes & self::ATTR_INDEX ? true : false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isUnique(): bool {
+        return $this->attributes & self::ATTR_UNIQUE ? true : false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAutoIncrement(): bool {
+        return $this->attributes & self::ATTR_AUTO_INCREMENT ? true : false;
     }
 
     /**

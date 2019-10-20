@@ -45,6 +45,13 @@ interface FieldInterface extends ObjectInterface
     const TYPE_DATE = 'DATE';
     const TYPE_DATE_TIME = 'DATETIME';
 
+    const ATTR_OPTIONAL = 1<<0;
+    const ATTR_UNIQUE = 1<<1;
+    const ATTR_INDEX = 1<<2;
+    const ATTR_AUTO_INCREMENT = 1<<3;
+    const ATTR_ALLOWS_NULL = 1<<4;
+    const ATTR_HAS_DEFAULT = 1<<5;
+
 
     /**
      * @return string
@@ -61,17 +68,12 @@ interface FieldInterface extends ObjectInterface
     public function getLength(): int;
 
     /**
-     * Allows NULL or not
+     * Get the attributes
      *
-     * @return bool
+     * @return int
+     * @see FieldInterface::ATTR_* flags
      */
-    public function allowsNull(): bool;
-
-    /**
-     * Returns true, if the field accepts a default value
-     * @return bool
-     */
-    public function hasDefaultValue(): bool;
+    public function getAttributes(): int;
 
     /**
      * The default value.

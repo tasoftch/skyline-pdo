@@ -44,7 +44,7 @@ use Skyline\PDO\Compiler\Structure\ObjectInterface;
 interface TableInterface extends ObjectInterface
 {
     /**
-     * @return ObjectInterface[]
+     * @return FieldInterface[]
      */
     public function getFieldObjects(): array;
 }

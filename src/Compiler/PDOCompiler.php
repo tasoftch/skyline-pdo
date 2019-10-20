@@ -45,7 +45,7 @@ class PDOCompiler extends AbstractCompiler
     {
         $collectedTables = [];
 
-        foreach($context->getSourceCodeManager()->yieldSourceFiles("/\.sql$/i") as $source) {
+        foreach($context->getSourceCodeManager()->yieldSourceFiles("/\.pdo\.php$/i") as $source) {
             $tables = silent_include($source);
             if(is_iterable($tables)) {
                 foreach($tables as $table) {
@@ -56,7 +56,7 @@ class PDOCompiler extends AbstractCompiler
             }
         }
 
-
+        print_r($collectedTables);
     }
 
     public function getCompilerName(): string

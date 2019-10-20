@@ -40,6 +40,7 @@ class Table implements TableInterface
     /** @var string */
     private $name;
     private $optional = false;
+    private $fieldObjects = [];
 
     /**
      * Table constructor.
@@ -65,5 +66,39 @@ class Table implements TableInterface
     public function isOptional(): bool
     {
         return $this->optional;
+    }
+
+    /**
+     * @return FieldInterface[]
+     */
+    public function getFieldObjects(): array
+    {
+        return $this->fieldObjects;
+    }
+
+    /**
+     * @param FieldInterface $field
+     * @return static
+     */
+    public function addField(FieldInterface $field) {
+        if(isset($this->fieldObjects[$field->getName()]))
+            trigger_error("Field ". $field->getName() ." is already defined", E_USER_WARNING);
+        else {
+            $this->fieldObjects[ $field->getName() ] = $field;
+        }
+        return $this;
+    }
+
+    /**
+     * @param $fieldOrName
+     * @return static
+     */
+    public function removeField($fieldOrName) {
+        if($fieldOrName instanceof FieldInterface) {
+            $fieldOrName = $fieldOrName->getName();
+        }
+        if(isset($this->fieldObjects[ $fieldOrName ]))
+            unset($this->fieldObjects[ $fieldOrName ]);
+        return $this;
     }
 }
