@@ -32,24 +32,18 @@
  *
  */
 
-namespace Skyline\PDO\Compiler\Structure\Table;
+namespace Skyline\PDO\Compiler\Structure\Loader;
 
-use Skyline\PDO\Compiler\Structure\ObjectInterface;
 
-/**
- * Describes a table
- *
- * @package Skyline\PDO\Compiler\Structure
- */
-interface TableInterface extends ObjectInterface
+use Skyline\PDO\Compiler\Structure\Loader\Parser\SQLParser;
+use TASoft\Parser\SimpleTokenParser;
+use TASoft\Parser\Tokenizer\PhpExpressionBasedTokenizer;
+
+class SQLLoader extends AbstractFileLoader
 {
-    /**
-     * @return FieldInterface[]
-     */
-    public function getFieldObjects(): array;
-
-    /**
-     * @return array|null
-     */
-    public function getContents(): ?array;
+    protected function loadTables(): array
+    {
+        $parser = new SQLParser( new PhpExpressionBasedTokenizer() );
+        print_r($parser->parseString( file_get_contents( $this->getFilename() ) ));
+    }
 }

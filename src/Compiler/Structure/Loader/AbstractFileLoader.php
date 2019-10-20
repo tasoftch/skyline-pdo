@@ -32,24 +32,28 @@
  *
  */
 
-namespace Skyline\PDO\Compiler\Structure\Table;
+namespace Skyline\PDO\Compiler\Structure\Loader;
 
-use Skyline\PDO\Compiler\Structure\ObjectInterface;
 
-/**
- * Describes a table
- *
- * @package Skyline\PDO\Compiler\Structure
- */
-interface TableInterface extends ObjectInterface
+abstract class AbstractFileLoader extends AbstractLoader
 {
-    /**
-     * @return FieldInterface[]
-     */
-    public function getFieldObjects(): array;
+    private $filename;
 
     /**
-     * @return array|null
+     * AbstractFileLoader constructor.
+     * @param $filename
      */
-    public function getContents(): ?array;
+    public function __construct($filename)
+    {
+        $this->filename = $filename;
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function getFilename()
+    {
+        return $this->filename;
+    }
 }

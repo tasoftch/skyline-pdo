@@ -41,6 +41,7 @@ class Table implements TableInterface
     private $name;
     private $optional = false;
     private $fieldObjects = [];
+    private $contents;
 
     /**
      * Table constructor.
@@ -74,6 +75,23 @@ class Table implements TableInterface
     public function getFieldObjects(): array
     {
         return $this->fieldObjects;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getContents(): ?array
+    {
+        return $this->contents;
+    }
+
+    /**
+     * @param array $contents
+     * @return static
+     */
+    public function setContents(array $contents) {
+        $this->contents = $contents;
+        return $this;
     }
 
     /**

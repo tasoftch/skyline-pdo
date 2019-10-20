@@ -32,24 +32,46 @@
  *
  */
 
-namespace Skyline\PDO\Compiler\Structure\Table;
+namespace Skyline\PDO\Compiler\Structure\Loader\Parser;
 
-use Skyline\PDO\Compiler\Structure\ObjectInterface;
 
-/**
- * Describes a table
- *
- * @package Skyline\PDO\Compiler\Structure
- */
-interface TableInterface extends ObjectInterface
+use TASoft\Parser\SimpleTokenParser;
+use TASoft\Parser\Token\TokenInterface;
+use TASoft\Parser\TokenSet\TokenSetTree;
+
+class SQLParser extends SimpleTokenParser
 {
-    /**
-     * @return FieldInterface[]
-     */
-    public function getFieldObjects(): array;
+    protected function ignoreToken(TokenInterface $token, int $options): bool
+    {
+        if($token->getCode() == T_WHITESPACE)
+            return true;
+        return false;
+    }
 
-    /**
-     * @return array|null
-     */
-    public function getContents(): ?array;
+
+
+    protected function parseToken(TokenInterface $token, int $options)
+    {
+        static $status = 0;
+        static $keywords = [];
+
+        print_r($token);
+
+        switch ($status) {
+            default:
+                $status = 0;
+                if($token->getContent() == 'CREATE') {
+                    $this->setNextExpected("
+TABLE
+    IF
+        NOT
+            EXISTS
+                (.T_STRING)
+    (.T_STRING)
+");
+                    $status = 1;
+                }
+        }
+    }
+
 }

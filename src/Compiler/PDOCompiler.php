@@ -37,31 +37,188 @@ namespace Skyline\PDO\Compiler;
 
 use Skyline\Compiler\AbstractCompiler;
 use Skyline\Compiler\CompilerContext;
+use Skyline\Kernel\Config\MainKernelConfig;
+use Skyline\PDO\Compiler\Structure\Table\FieldInterface;
+use Skyline\PDO\Compiler\Structure\Table\Table;
 use Skyline\PDO\Compiler\Structure\Table\TableInterface;
+use Skyline\PDO\Config\PDOFactory;
 
 class PDOCompiler extends AbstractCompiler
 {
+
     public function compile(CompilerContext $context)
     {
-        $collectedTables = [];
+        if($context->includePDOResolving()) {
+            if($sm = $context->getServiceManager()) {
+                /** @var \PDO $PDO */
+                $PDO = $sm->get( PDOFactory::PDO_SERVICE );
 
-        foreach($context->getSourceCodeManager()->yieldSourceFiles("/\.pdo\.php$/i") as $source) {
-            $tables = silent_include($source);
-            if(is_iterable($tables)) {
-                foreach($tables as $table) {
-                    if($table instanceof TableInterface) {
-                        $collectedTables[ $table->getName() ][] = $table;
+                $collectedTables = [];
+
+                foreach($context->getSourceCodeManager()->yieldSourceFiles("/\.pdo\.php$/i") as $source) {
+                    $tables = silent_include($source);
+                    if(is_iterable($tables)) {
+                        foreach($tables as $table) {
+                            if($table instanceof TableInterface) {
+                                $collectedTables[ $table->getName() ][] = $table;
+                            }
+                        }
                     }
                 }
-            }
-        }
 
-        print_r($collectedTables);
+
+                foreach($collectedTables as $name => &$tables) {
+                    $theTable = new Table($name);
+                    $contents = [];
+
+                    /** @var TableInterface $table */
+                    foreach($tables as $table) {
+                        foreach($table->getFieldObjects() as $nam => $field) {
+                            $theTable->addField($field);
+                        }
+                        $contents = array_merge($contents, $table->getContents());
+                    }
+
+                    $theTable->setContents($contents);
+                    $tables = $theTable;
+                }
+
+
+                foreach($collectedTables as $table) {
+                    $tableName = $table->getName();
+                    try {
+                        $result = @$PDO->prepare("SELECT 1 FROM $tableName LIMIT 1");
+                        $result = $result->execute();
+
+                        echo "TABLE $tableName EXISTS.\n";
+
+                        foreach($table->getFieldObjects() as $object) {
+                            try {
+                                $name = $object->getName();
+                                $res = @$PDO->prepare("SELECT `$name` FROM $tableName LIMIT 1")->execute();
+                            } catch (\PDOException $exception) {
+                                $res = false;
+                            }
+
+                            if(!$res) {
+                                echo "**    FIELD $tableName.$name DOES NOT EXIST.\nTRIES TO CREATE... ";
+
+                                $sql =  "ALTER TABLE $tableName ADD " . $this->makeFieldSQL($object, $PDO);
+                                try {
+                                    $PDO->exec($sql);
+                                    echo "Success.\n";
+                                } catch (\PDOException $exception) {
+                                    echo "Failed: ", $exception->getMessage(), "\n";
+                                }
+                            } else
+                                echo "**    FIELD $tableName.$name EXISTS.\n";
+                        }
+                    } catch (\PDOException $exception) {
+                        $result = false;
+                    }
+
+                    if(!$result) {
+                        echo "** TABLE $tableName DOES NOT EXIST.\n";
+                        if($table->isOptional() == false) {
+                            echo "** TRIES TO CREATE ... ";
+                            $this->makeTable($table, $PDO);
+                        }
+                    }
+
+
+                    if($contents = $table->getContents()) {
+                        foreach($contents as $content) {
+                            $names = [];
+                            $values = [];
+
+                            foreach($content as $name => $value) {
+                                $names[] = "`$name`";
+                                $values[] = $PDO->quote($value);
+                            }
+
+                            $names = implode(",", $names);
+                            $values = implode(",", $values);
+
+                            try {
+                                $PDO->exec("INSERT INTO $tableName ($names) VALUES ($values)");
+                                echo "** CONTENT INSERTED.\n";
+                            } catch (\PDOException $exception) {
+                                echo "** INSERT FAILED: ", $exception->getMessage(), "\n";
+                                print_r($content);
+                            }
+
+                        }
+                    }
+
+
+                    error_clear_last();
+                }
+            }
+        } else {
+            echo "** PDO Resolving skipped. Use option --with-pdo for compilation.\n";
+        }
     }
 
     public function getCompilerName(): string
     {
         return "PDO Compiler";
+    }
+
+    protected function makeFieldSQL(FieldInterface $field, $PDO) {
+        $fsql = "    " . $field->getName();
+        $fsql .= " " . $field->getValueType();
+        if($l = $field->getLength())
+            $fsql.= "($l)";
+
+        if($field->getAttributes() & FieldInterface::ATTR_HAS_DEFAULT) {
+            $def = $field->getValueType();
+
+            $fsql .= " DEFAULT " . var_export($def, true);
+        }
+
+        if($field->getAttributes() & FieldInterface::ATTR_ALLOWS_NULL) {
+            $fsql .= " NULL";
+        } else
+            $fsql .= " NOT NULL";
+
+        if($field->getAttributes() & FieldInterface::ATTR_INDEX) {
+            $fsql .= " PRIMARY KEY";
+        }
+
+        if($field->getAttributes() & FieldInterface::ATTR_UNIQUE) {
+            $fsql .= " UNIQUE";
+        }
+
+        if($field->getAttributes() & FieldInterface::ATTR_AUTO_INCREMENT) {
+            if($PDO->getAttribute( \PDO::ATTR_DRIVER_NAME ) == "mysql")
+                $fsql .= " AUTO_INCREMENT";
+            else
+                $fsql .= " AUTOINCREMENT";
+        }
+        return $fsql;
+    }
+
+    protected function makeTable(TableInterface $table, \PDO $PDO) {
+        $sql = "CREATE TABLE " . $table->getName() . " (";
+
+        $fields = [];
+        $tables = [];
+
+        foreach($table->getFieldObjects() as $field) {
+            $fields[] = $this->makeFieldSQL($field, $PDO);
+        }
+
+        $sql .= $fields ? "\n" . implode(",\n", $fields) : "";
+
+        $sql .= "\n)";
+
+        try {
+            $PDO->exec($sql);
+            echo "Success.\n";
+        } catch (\PDOException $exception) {
+            echo "Failed: ", $exception->getMessage(), "\n";
+        }
+
     }
 }
 

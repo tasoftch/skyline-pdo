@@ -32,24 +32,21 @@
  *
  */
 
-namespace Skyline\PDO\Compiler\Structure\Table;
-
-use Skyline\PDO\Compiler\Structure\ObjectInterface;
-
 /**
- * Describes a table
+ * SQLLoaderTest.php
+ * skyline-pdo
  *
- * @package Skyline\PDO\Compiler\Structure
+ * Created on 2019-10-20 11:04 by thomas
  */
-interface TableInterface extends ObjectInterface
-{
-    /**
-     * @return FieldInterface[]
-     */
-    public function getFieldObjects(): array;
 
-    /**
-     * @return array|null
-     */
-    public function getContents(): ?array;
+use PHPUnit\Framework\TestCase;
+use Skyline\PDO\Compiler\Structure\Loader\SQLLoader;
+
+class SQLLoaderTest extends TestCase
+{
+    public function testSQLLoader() {
+        $ld = new SQLLoader(__DIR__ . "/SQL/test1.sql");
+
+        print_r($ld->getTables());
+    }
 }

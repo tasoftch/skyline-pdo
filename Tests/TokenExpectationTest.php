@@ -32,24 +32,32 @@
  *
  */
 
-namespace Skyline\PDO\Compiler\Structure\Table;
-
-use Skyline\PDO\Compiler\Structure\ObjectInterface;
-
 /**
- * Describes a table
+ * TokenExpectationTest.php
+ * skyline-pdo
  *
- * @package Skyline\PDO\Compiler\Structure
+ * Created on 2019-10-20 12:15 by thomas
  */
-interface TableInterface extends ObjectInterface
-{
-    /**
-     * @return FieldInterface[]
-     */
-    public function getFieldObjects(): array;
 
-    /**
-     * @return array|null
-     */
-    public function getContents(): ?array;
+use PHPUnit\Framework\TestCase;
+use TASoft\Parser\TokenSet\TokenSetTree;
+
+class TokenExpectationTest extends TestCase
+{
+    public function testTreeSet() {
+        $treeSet = TokenSetTree::create("
+
+
+
+CREATE
+    TABLE|OBJECT|ITEM
+        IF
+            NOT
+                EXISTS
+                    (.T_STRING)
+    (.T_STRING)
+        ");
+
+        print_r($treeSet);
+    }
 }

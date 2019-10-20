@@ -32,24 +32,18 @@
  *
  */
 
-namespace Skyline\PDO\Compiler\Structure\Table;
-
-use Skyline\PDO\Compiler\Structure\ObjectInterface;
-
 /**
- * Describes a table
+ * SqliteTest.php
+ * skyline-pdo
  *
- * @package Skyline\PDO\Compiler\Structure
+ * Created on 2019-10-19 22:42 by thomas
  */
-interface TableInterface extends ObjectInterface
-{
-    /**
-     * @return FieldInterface[]
-     */
-    public function getFieldObjects(): array;
 
-    /**
-     * @return array|null
-     */
-    public function getContents(): ?array;
+use PHPUnit\Framework\TestCase;
+
+class SqliteTest extends TestCase
+{
+    public function testSQLite() {
+
+    }
 }

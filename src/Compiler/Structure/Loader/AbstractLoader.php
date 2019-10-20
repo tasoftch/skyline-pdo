@@ -32,24 +32,19 @@
  *
  */
 
-namespace Skyline\PDO\Compiler\Structure\Table;
+namespace Skyline\PDO\Compiler\Structure\Loader;
 
-use Skyline\PDO\Compiler\Structure\ObjectInterface;
 
-/**
- * Describes a table
- *
- * @package Skyline\PDO\Compiler\Structure
- */
-interface TableInterface extends ObjectInterface
+abstract class AbstractLoader implements LoaderInterface
 {
-    /**
-     * @return FieldInterface[]
-     */
-    public function getFieldObjects(): array;
+    private $tables;
 
-    /**
-     * @return array|null
-     */
-    public function getContents(): ?array;
+    public function getTables(): array
+    {
+        if(NULL === $this->tables)
+            $this->tables = $this->loadTables();
+        return $this->tables;
+    }
+
+    abstract protected function loadTables(): array;
 }
