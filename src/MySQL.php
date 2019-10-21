@@ -36,6 +36,8 @@ namespace Skyline\PDO;
 
 
 
+use TASoft\Util\Mapper\MapperChain;
+
 class MySQL extends AbstractPDO
 {
     const SERVICE_NAME = 'MySQL';
@@ -56,8 +58,5 @@ class MySQL extends AbstractPDO
         if($socket)
             $dsn .= ";unix_socket=$socket";
         parent::__construct($dsn, $username, $passwd, $options);
-
-        $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        $this->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
     }
 }

@@ -35,6 +35,8 @@
 namespace Skyline\PDO;
 
 
+use TASoft\Util\Mapper\DateMapper;
+use TASoft\Util\Mapper\MapperChain;
 use TASoft\Util\PDO;
 
 abstract class AbstractPDO extends PDO
@@ -48,6 +50,21 @@ abstract class AbstractPDO extends PDO
 
     public function setConfiguration($config) {
         $this->configuration = $config;
+    }
+
+    public function __construct($dsn, $username = NULL, $passwd = NULL, $options = NULL)
+    {
+        parent::__construct($dsn, $username, $passwd, $options);
+        $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $this->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
+
+        $tm = new MapperChain();
+        $this->setTypeMapper($tm);
+        $this->adjustTypeMapping($tm);
+    }
+
+    protected function adjustTypeMapping(MapperChain $chain) {
+        $chain->addMapper(new DateMapper());
     }
 
     protected function resolveSQLTablePrefix(string $sql): string {
@@ -73,7 +90,7 @@ abstract class AbstractPDO extends PDO
         parent::exec($statement);
     }
 
-    public function prepare($statement, array $driver_options = array())
+    public function prepare($statement, $driver_options = [])
     {
         if(is_string($statement))
             $statement = $this->resolveSQLTablePrefix($statement);
