@@ -180,7 +180,9 @@ class PDOCompiler extends AbstractCompiler
         if($field->getAttributes() & FieldInterface::ATTR_HAS_DEFAULT) {
             $def = $field->getDefaultValue();
 
-            if(is_null($def))
+            if($field->getAttributes() & FieldInterface::ATTR_DEFAULT_TIMESTAMP) {
+                $fsql .= " DEFAULT CURRENT_TIMESTAMP";
+            } elseif(is_null($def))
                 $fsql .= " DEFAULT NULL";
             elseif(is_int($def)) {
                 $fsql .= " DEFAULT $def";

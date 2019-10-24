@@ -52,6 +52,7 @@ interface FieldInterface extends ObjectInterface
     const ATTR_ALLOWS_NULL = 1<<4;
     const ATTR_HAS_DEFAULT = 1<<5;
     const ATTR_UPDATE_TIME_STAMP = 1<<6;
+    const ATTR_DEFAULT_TIMESTAMP = 1<<7;
 
 
     /**
