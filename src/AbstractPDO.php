@@ -113,13 +113,13 @@ abstract class AbstractPDO extends PDO
     public function injectWithObjects(string $sql)
     {
         $sql = $this->resolveSQLTablePrefix($sql);
-        parent::injectWithObjects($sql);
+        return parent::injectWithObjects($sql);
     }
 
     public function inject(string $sql)
     {
         $sql = $this->resolveSQLTablePrefix($sql);
-        parent::inject($sql);
+        return parent::inject($sql);
     }
 
     public function count(string $sql, array $arguments = []): int
