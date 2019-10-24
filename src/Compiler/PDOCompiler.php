@@ -171,16 +171,26 @@ class PDOCompiler extends AbstractCompiler
         if($l = $field->getLength())
             $fsql.= "($l)";
 
-        if($field->getAttributes() & FieldInterface::ATTR_HAS_DEFAULT) {
-            $def = $field->getValueType();
-
-            $fsql .= " DEFAULT " . var_export($def, true);
-        }
-
         if($field->getAttributes() & FieldInterface::ATTR_ALLOWS_NULL) {
             $fsql .= " NULL";
         } else
             $fsql .= " NOT NULL";
+
+
+        if($field->getAttributes() & FieldInterface::ATTR_HAS_DEFAULT) {
+            $def = $field->getDefaultValue();
+
+            if(is_null($def))
+                $fsql .= " DEFAULT NULL";
+            elseif(is_int($def)) {
+                $fsql .= " DEFAULT $def";
+            } elseif(is_bool($def))
+                $fsql .= " DEFAULT " . ($def?'TRUE':'FALSE');
+            else
+                $fsql .= " DEFAULT " . $PDO->quote($def);
+        }
+
+
 
         if($field->getAttributes() & FieldInterface::ATTR_INDEX) {
             $fsql .= " PRIMARY KEY";
