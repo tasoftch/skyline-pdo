@@ -76,7 +76,8 @@ class PDOCompiler extends AbstractCompiler
                         foreach($table->getFieldObjects() as $nam => $field) {
                             $theTable->addField($field);
                         }
-                        $contents = array_merge($contents, $table->getContents());
+                        if($table->getContents())
+                            $contents = array_merge($contents, $table->getContents());
                     }
 
                     $theTable->setContents($contents);
