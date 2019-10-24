@@ -196,6 +196,9 @@ class PDOCompiler extends AbstractCompiler
             else
                 $fsql .= " AUTOINCREMENT";
         }
+
+        if($field->getAttributes() & FieldInterface::ATTR_UPDATE_TIME_STAMP)
+            $fsql .= " ON UPDATE CURRENT_TIMESTAMP";
         return $fsql;
     }
 
