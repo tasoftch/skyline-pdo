@@ -166,6 +166,8 @@ class PDOCompiler extends AbstractCompiler
     }
 
     protected function makeFieldSQL(FieldInterface $field, $PDO) {
+        $driver = $PDO->getAttribute( \PDO::ATTR_DRIVER_NAME );
+
         $fsql = "    " . $field->getName();
         $fsql .= " " . $field->getValueType();
         if($l = $field->getLength())
@@ -203,14 +205,14 @@ class PDOCompiler extends AbstractCompiler
         }
 
         if($field->getAttributes() & FieldInterface::ATTR_AUTO_INCREMENT) {
-            if($PDO->getAttribute( \PDO::ATTR_DRIVER_NAME ) == "mysql")
+            if($driver == "mysql")
                 $fsql .= " AUTO_INCREMENT";
             else {
                 $fsql = "    " . $field->getName() . " INTEGER PRIMARY KEY AUTOINCREMENT";
             }
         }
 
-        if($field->getAttributes() & FieldInterface::ATTR_UPDATE_TIME_STAMP)
+        if($driver == 'mysql' && $field->getAttributes() & FieldInterface::ATTR_UPDATE_TIME_STAMP)
             $fsql .= " ON UPDATE CURRENT_TIMESTAMP";
 
         return $fsql;
