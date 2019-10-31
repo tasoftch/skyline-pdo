@@ -205,12 +205,14 @@ class PDOCompiler extends AbstractCompiler
         if($field->getAttributes() & FieldInterface::ATTR_AUTO_INCREMENT) {
             if($PDO->getAttribute( \PDO::ATTR_DRIVER_NAME ) == "mysql")
                 $fsql .= " AUTO_INCREMENT";
-            else
-                $fsql .= " AUTOINCREMENT";
+            else {
+                $fsql = "    " . $field->getName() . " INTEGER PRIMARY KEY AUTOINCREMENT";
+            }
         }
 
         if($field->getAttributes() & FieldInterface::ATTR_UPDATE_TIME_STAMP)
             $fsql .= " ON UPDATE CURRENT_TIMESTAMP";
+
         return $fsql;
     }
 
