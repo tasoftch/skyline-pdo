@@ -22,5 +22,6 @@
     "phpunit/phpunit": "^6",
     "skyline/compiler": "dev-master",
     "tasoft/php-parser": "dev-master"
-  }
+  },
+  "bin": ["bin/compile-pdo.php"]
 }
