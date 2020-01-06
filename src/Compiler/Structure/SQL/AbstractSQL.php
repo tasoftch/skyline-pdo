@@ -162,6 +162,6 @@ abstract class AbstractSQL implements SerializerInterface
         $names = implode(",", $names);
         $values = implode(",", $values);
 
-        return "$names VALUES ($values)";
+        return "($names) VALUES ($values)";
     }
 }
