@@ -63,12 +63,19 @@ class Field implements FieldInterface
     public function __construct(string $name, $valueType = self::TYPE_TEXT, int $length = 0, int $attributes = 0, $defaultValue = NULL)
     {
         $this->name = $name;
-        $this->valueType = $valueType;
-        $this->length = $length;
         $this->defaultValue = $defaultValue;
 
         if($attributes & self::ATTR_INDEX)
             $attributes |= self::ATTR_AUTO_INCREMENT;
+
+        if($attributes & self::ATTR_AUTO_INCREMENT)
+            $valueType = self::TYPE_INTEGER;
+
+        if($valueType != self::TYPE_STRING)
+            $length = 0;
+
+        $this->valueType = $valueType;
+        $this->length = $length;
 
         $this->attributes = $attributes;
     }

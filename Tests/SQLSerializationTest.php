@@ -41,6 +41,7 @@
 
 use PHPUnit\Framework\TestCase;
 use Skyline\PDO\Compiler\Structure\SQL\MySQL;
+use Skyline\PDO\Compiler\Structure\SQL\SQLite;
 use Skyline\PDO\Compiler\Structure\Table\Field;
 use Skyline\PDO\Compiler\Structure\Table\Table;
 
@@ -48,6 +49,7 @@ class SQLSerializationTest extends TestCase
 {
     public function testMySQLSerializer() {
         $mySQL = new MySQL();
+        $sqlite = new SQLite();
 
         $this->assertEquals("CREATE TABLE TEST (
 \tid INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT
@@ -57,5 +59,38 @@ class SQLSerializationTest extends TestCase
                     ->addField( new Field("id", Field::TYPE_INTEGER, 0, Field::ATTR_INDEX) )
             )
         );
+
+        $this->assertEquals("CREATE TABLE IF NOT EXISTS TEST (
+\tid INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT
+);",
+            $mySQL->serializeTable(
+                (new Table("TEST", true))
+                    ->addField( new Field("id", Field::TYPE_INTEGER, 0, Field::ATTR_INDEX) )
+            )
+        );
+
+        $this->assertEquals("name VARCHAR(25) NOT NULL", $mySQL->serializeField(
+            new Field("name", Field::TYPE_STRING, 25)
+        ));
+
+        $this->assertEquals("name TEXT NULL", $mySQL->serializeField(
+            new Field("name", Field::TYPE_TEXT, 0, Field::ATTR_ALLOWS_NULL)
+        ));
+
+        $this->assertEquals("name INTEGER NOT NULL AUTO_INCREMENT", $mySQL->serializeField(
+            new Field("name", Field::TYPE_TEXT, 0, Field::ATTR_AUTO_INCREMENT)
+        ));
+
+        $this->assertEquals("name INTEGER NOT NULL AUTOINCREMENT", $sqlite->serializeField(
+            new Field("name", Field::TYPE_TEXT, 0, Field::ATTR_AUTO_INCREMENT)
+        ));
+
+        $this->assertEquals("name INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT", $mySQL->serializeField(
+            new Field("name", Field::TYPE_DATE, 0, Field::ATTR_INDEX)
+        ));
+
+        $this->assertEquals("name INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT", $sqlite->serializeField(
+            new Field("name", Field::TYPE_STRING, 17, Field::ATTR_INDEX)
+        ));
     }
 }
