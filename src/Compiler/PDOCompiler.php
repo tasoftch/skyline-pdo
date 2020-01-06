@@ -38,6 +38,9 @@ namespace Skyline\PDO\Compiler;
 use Skyline\Compiler\AbstractCompiler;
 use Skyline\Compiler\CompilerContext;
 use Skyline\Kernel\Config\MainKernelConfig;
+use Skyline\PDO\Compiler\Structure\SQL\MySQL;
+use Skyline\PDO\Compiler\Structure\SQL\SerializerInterface;
+use Skyline\PDO\Compiler\Structure\SQL\SQLite;
 use Skyline\PDO\Compiler\Structure\Table\FieldInterface;
 use Skyline\PDO\Compiler\Structure\Table\Table;
 use Skyline\PDO\Compiler\Structure\Table\TableInterface;
@@ -45,6 +48,32 @@ use Skyline\PDO\Config\PDOFactory;
 
 class PDOCompiler extends AbstractCompiler
 {
+    public $sqlMap = [
+        "mysql" => MySQL::class,
+        "sqlite" => SQLite::class
+    ];
+
+    /**
+     * Create a mapped serializer to generate SQL for the given driver
+     *
+     *
+     * @param \PDO|NULL $PDO
+     * @return SerializerInterface
+     * @throws \Exception
+     */
+    public function createSerializer(\PDO $PDO = NULL): SerializerInterface {
+        static $ser = NULL;
+        if(!$ser) {
+            $cn = $this->sqlMap[ $PDO->getAttribute( \PDO::ATTR_DRIVER_NAME ) ] ?? NULL;
+            if(!$cn)
+                throw new \Exception("Can not create SQL for used driver");
+
+            /** @var SerializerInterface $sqlGen */
+            $ser = new $cn($PDO);
+        }
+        return $ser;
+    }
+
 
     public function compile(CompilerContext $context)
     {
@@ -84,6 +113,8 @@ class PDOCompiler extends AbstractCompiler
                     $tables = $theTable;
                 }
 
+                $serializer = $this->createSerializer( $PDO );
+
 
                 foreach($collectedTables as $table) {
                     $tableName = $table->getName();
@@ -104,7 +135,7 @@ class PDOCompiler extends AbstractCompiler
                             if(!$res) {
                                 echo "**    FIELD $tableName.$name DOES NOT EXIST.\nTRIES TO CREATE... ";
 
-                                $sql =  "ALTER TABLE $tableName ADD " . $this->makeFieldSQL($object, $PDO);
+                                $sql =  "ALTER TABLE $tableName ADD " . $serializer->serializeField($object);
                                 try {
                                     $PDO->exec($sql);
                                     echo "Success.\n";
@@ -122,26 +153,20 @@ class PDOCompiler extends AbstractCompiler
                         echo "** TABLE $tableName DOES NOT EXIST.\n";
                         if($table->isOptional() == false) {
                             echo "** TRIES TO CREATE ... ";
-                            $this->makeTable($table, $PDO);
+                            try {
+                                $PDO->exec( $serializer->serializeTable( $table ) );
+                                echo "Success.\n";
+                            } catch (\PDOException $exception) {
+                                echo "Failed: ", $exception->getMessage(), "\n";
+                            }
                         }
                     }
 
 
                     if($contents = $table->getContents()) {
                         foreach($contents as $content) {
-                            $names = [];
-                            $values = [];
-
-                            foreach($content as $name => $value) {
-                                $names[] = "`$name`";
-                                $values[] = $PDO->quote($value);
-                            }
-
-                            $names = implode(",", $names);
-                            $values = implode(",", $values);
-
                             try {
-                                $PDO->exec("INSERT INTO $tableName ($names) VALUES ($values)");
+                                $PDO->exec("INSERT INTO $tableName " . $serializer->serializeContentRow($content));
                                 echo "** CONTENT INSERTED.\n";
                             } catch (\PDOException $exception) {
                                 echo "** INSERT FAILED: ", $exception->getMessage(), "\n";
@@ -163,82 +188,6 @@ class PDOCompiler extends AbstractCompiler
     public function getCompilerName(): string
     {
         return "PDO Compiler";
-    }
-
-    protected function makeFieldSQL(FieldInterface $field, $PDO) {
-        $driver = $PDO->getAttribute( \PDO::ATTR_DRIVER_NAME );
-
-        $fsql = "    " . $field->getName();
-        $fsql .= " " . $field->getValueType();
-        if($l = $field->getLength())
-            $fsql.= "($l)";
-
-        if($field->getAttributes() & FieldInterface::ATTR_ALLOWS_NULL) {
-            $fsql .= " NULL";
-        } else
-            $fsql .= " NOT NULL";
-
-
-        if($field->getAttributes() & FieldInterface::ATTR_HAS_DEFAULT) {
-            $def = $field->getDefaultValue();
-
-            if($field->getAttributes() & FieldInterface::ATTR_DEFAULT_TIMESTAMP) {
-                $fsql .= " DEFAULT CURRENT_TIMESTAMP";
-            } elseif(is_null($def))
-                $fsql .= " DEFAULT NULL";
-            elseif(is_int($def)) {
-                $fsql .= " DEFAULT $def";
-            } elseif(is_bool($def))
-                $fsql .= " DEFAULT " . ($def?'TRUE':'FALSE');
-            else
-                $fsql .= " DEFAULT " . $PDO->quote($def);
-        }
-
-
-
-        if($field->getAttributes() & FieldInterface::ATTR_INDEX) {
-            $fsql .= " PRIMARY KEY";
-        }
-
-        if($field->getAttributes() & FieldInterface::ATTR_UNIQUE) {
-            $fsql .= " UNIQUE";
-        }
-
-        if($field->getAttributes() & FieldInterface::ATTR_AUTO_INCREMENT) {
-            if($driver == "mysql")
-                $fsql .= " AUTO_INCREMENT";
-            else {
-                $fsql = "    " . $field->getName() . " INTEGER PRIMARY KEY AUTOINCREMENT";
-            }
-        }
-
-        if($driver == 'mysql' && $field->getAttributes() & FieldInterface::ATTR_UPDATE_TIME_STAMP)
-            $fsql .= " ON UPDATE CURRENT_TIMESTAMP";
-
-        return $fsql;
-    }
-
-    protected function makeTable(TableInterface $table, \PDO $PDO) {
-        $sql = "CREATE TABLE " . $table->getName() . " (";
-
-        $fields = [];
-        $tables = [];
-
-        foreach($table->getFieldObjects() as $field) {
-            $fields[] = $this->makeFieldSQL($field, $PDO);
-        }
-
-        $sql .= $fields ? "\n" . implode(",\n", $fields) : "";
-
-        $sql .= "\n)";
-
-        try {
-            $PDO->exec($sql);
-            echo "Success.\n";
-        } catch (\PDOException $exception) {
-            echo "Failed: ", $exception->getMessage(), "\n";
-        }
-
     }
 }
 

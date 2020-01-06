@@ -32,32 +32,38 @@
  *
  */
 
-/**
- * TokenExpectationTest.php
- * skyline-pdo
- *
- * Created on 2019-10-20 12:15 by thomas
- */
+namespace Skyline\PDO\Compiler\Structure\SQL;
 
-use PHPUnit\Framework\TestCase;
-use TASoft\Parser\TokenSet\TokenSetTree;
 
-class TokenExpectationTest extends TestCase
+use Skyline\PDO\Compiler\Structure\Table\FieldInterface;
+use Skyline\PDO\Compiler\Structure\Table\TableInterface;
+
+interface SerializerInterface
 {
-    public function testTreeSet() {
-        $treeSet = TokenSetTree::create("
+    /**
+     * This method must serialize the whole table creation SQL including its fields.
+     * Expected SQL: CREATE TABLE [IF NOT EXISTS] ... (...)
+     *
+     * @param TableInterface $table
+     * @return string
+     */
+    public function serializeTable(TableInterface $table): string;
 
+    /**
+     * Single field serialization
+     * Expected SQL inside the () of CREATE TABLE (...)
+     *
+     * @param FieldInterface $field
+     * @return string
+     */
+    public function serializeField(FieldInterface $field): string;
 
-
-CREATE
-    TABLE|OBJECT|ITEM
-        IF
-            NOT
-                EXISTS
-                    (.T_STRING)
-    (.T_STRING)
-        ");
-
-        print_r($treeSet);
-    }
+    /**
+     * serialize data row record to an insert SQL statement
+     * Expected SQL:  (...) VALUES (...)
+     *
+     * @param array $record
+     * @return string
+     */
+    public function serializeContentRow(array $record): string;
 }

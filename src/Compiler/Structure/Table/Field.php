@@ -67,6 +67,9 @@ class Field implements FieldInterface
         $this->length = $length;
         $this->defaultValue = $defaultValue;
 
+        if($attributes & self::ATTR_INDEX)
+            $attributes |= self::ATTR_AUTO_INCREMENT;
+
         $this->attributes = $attributes;
     }
 
