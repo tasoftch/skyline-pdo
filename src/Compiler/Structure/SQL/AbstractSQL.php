@@ -64,10 +64,13 @@ abstract class AbstractSQL implements SerializerInterface
             $SQL = sprintf("CREATE TABLE IF NOT EXISTS %s (\n", $table->getName());
         else
             $SQL = sprintf("CREATE TABLE %s (\n", $table->getName());
+        $fields = [];
 
         foreach($table->getFieldObjects() as $field) {
-            $SQL .= "\t" . $this->serializeField( $field ) . "\n";
+            $fields[] = "\t" . $this->serializeField( $field );
         }
+
+        $SQL .= implode(",\n", $fields) . "\n";
 
         return $SQL . ");";
     }
