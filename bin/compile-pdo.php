@@ -111,7 +111,7 @@ if($pdo_files) {
             die();
         }
 
-        $PDO = new \TASoft\Util\PDO($options["pdo"]);
+        $PDO = new \TASoft\Util\PDO($options["pdo"], $options["u"] ?? NULL, $options["p"] ?? NULL);
 
         $driver = $options["d"] ?? "sqlite";
         switch (strtolower( $PDO->getAttribute( PDO::ATTR_DRIVER_NAME ) )) {
