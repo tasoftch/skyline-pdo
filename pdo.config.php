@@ -33,6 +33,7 @@
  */
 
 use Skyline\Kernel\Config\MainKernelConfig;
+use Skyline\PDO\AbstractPDO;
 use Skyline\PDO\Config\PDOFactory;
 use Skyline\PDO\MySQL;
 use Skyline\PDO\SQLite;
@@ -45,7 +46,8 @@ return [
             AbstractFileConfiguration::SERVICE_INIT_ARGUMENTS => [
                 'defaultPDO' => '%pdo.primary%',
                 'alternatePDO' => '%pdo.secondary%',
-            ]
+            ],
+			AbstractFileConfiguration::CONFIG_SERVICE_TYPE_KEY => AbstractPDO::class
         ],
 
         MySQL::SERVICE_NAME => [
@@ -55,7 +57,8 @@ return [
                 MySQL::ARGUMENT_DATA_BASE => '%pdo.mysql.dataBase%',
                 MySQL::ARGUMENT_USERNAME => '%pdo.mysql.username%',
                 MySQL::ARGUMENT_PASSWORD => '%pdo.mysql.password%',
-                MySQL::ARGUMENT_SOCKET => '%pdo.mysql.socket%'
+                MySQL::ARGUMENT_SOCKET => '%pdo.mysql.socket%',
+				MySQL::ARGUMENT_VERIFIED => '%pdo.mysql.verified%'
             ],
             AbstractFileConfiguration::SERVICE_INIT_CONFIGURATION => [
                 MySQL::CONFIG_TABLE_PREFIX => '%pdo.prefix%'

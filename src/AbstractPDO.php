@@ -35,11 +35,12 @@
 namespace Skyline\PDO;
 
 
+use Skyline\Kernel\ExposeClassInterface;
 use TASoft\Util\Mapper\DateMapper;
 use TASoft\Util\Mapper\MapperChain;
 use TASoft\Util\PDO;
 
-abstract class AbstractPDO extends PDO
+abstract class AbstractPDO extends PDO implements ExposeClassInterface
 {
     private $configuration;
 
@@ -127,4 +128,9 @@ abstract class AbstractPDO extends PDO
         $sql = $this->resolveSQLTablePrefix($sql);
         return parent::count($sql, $arguments);
     }
+
+	public static function getPurposes(): array
+	{
+		return ['PDO'];
+	}
 }

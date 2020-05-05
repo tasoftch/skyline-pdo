@@ -36,21 +36,27 @@ namespace Skyline\PDO;
 
 
 
-use TASoft\Util\Mapper\MapperChain;
+use PDO;
+use PDOException;
 
 class MySQL extends AbstractPDO
 {
-    const SERVICE_NAME = 'MySQL';
+	const SERVICE_NAME = 'MySQL';
 
     const ARGUMENT_HOST = 'host';
     const ARGUMENT_DATA_BASE = 'dbname';
     const ARGUMENT_SOCKET = 'socket';
 
+    const ARGUMENT_VERIFIED = 'verified';
 
-    public function __construct($host, $dataBase, $username = NULL, $passwd = NULL, $socket = "")
+
+    public function __construct($host, $dataBase, $username = NULL, $passwd = NULL, $socket = "", bool $isVerified = NULL)
     {
+    	if(!$isVerified) {
+    		throw new PDOException("PDO not verified");
+		}
         $options = array(
-            \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
         );
 
         $dsn = "mysql:dbname=$dataBase;host=$host";

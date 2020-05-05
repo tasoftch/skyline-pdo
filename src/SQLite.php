@@ -37,7 +37,7 @@ namespace Skyline\PDO;
 
 class SQLite extends AbstractPDO
 {
-    const SERVICE_NAME = 'SQLite';
+	const SERVICE_NAME = 'SQLite';
 
     const ARGUMENT_FILENAME = 'filename';
 

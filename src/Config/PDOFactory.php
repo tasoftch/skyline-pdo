@@ -37,6 +37,7 @@ namespace Skyline\PDO\Config;
 
 use TASoft\Service\Container\AbstractContainer;
 use TASoft\Service\ServiceManager;
+use Throwable;
 
 class PDOFactory extends AbstractContainer
 {
@@ -49,9 +50,12 @@ class PDOFactory extends AbstractContainer
     {
         try {
             return ServiceManager::generalServiceManager()->get($this->defaultPDOName);
-        } catch (\Throwable $exception) {
-            return ServiceManager::generalServiceManager()->get($this->secondaryPDOName);
+        } catch (Throwable $exception) {
+        	try {
+				return ServiceManager::generalServiceManager()->get($this->secondaryPDOName);
+			} catch (Throwable $exception) {}
         }
+        return NULL;
     }
 
     public function __construct($defaultPDOName, $secondaryPDOName)
