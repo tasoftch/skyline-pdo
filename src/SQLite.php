@@ -44,5 +44,8 @@ class SQLite extends AbstractPDO
     public function __construct($filename, $username = NULL, $passwd = NULL, $options = NULL)
     {
         parent::__construct("sqlite:$filename", $username, $passwd, $options);
+        $this->sqliteCreateFunction("NOW", function() {
+        	return (new \DateTime())->format("Y-m-d G:i:s");
+		});
     }
 }
