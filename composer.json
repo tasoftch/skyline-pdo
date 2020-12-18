@@ -14,7 +14,7 @@
   },
   "require" : {
     "php": ">=7.2",
-    "tasoft/php-pdo": "^0.7",
+    "tasoft/php-pdo": "^0.8",
     "ext-pdo": "*"
   },
   "require-dev": {
