@@ -46,7 +46,7 @@ return [
     'pdo.mysql.password' => '',
     'pdo.mysql.socket' => '',
 
-    'pdo.sqlite.filename' => '$(C)/secondary.db.sqlite',
+    'pdo.sqlite.filename' => '$(U)/secondary.db.sqlite',
     "pdo.sqlite.username" => '',
     "pdo.sqlite.password" => ''
 ];
