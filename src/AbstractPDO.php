@@ -76,22 +76,22 @@ abstract class AbstractPDO extends PDO implements ExposeClassInterface
         return $sql;
     }
 
-    public function query($statement, $mode = \PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = NULL, array $ctorargs = array())
+    public function query($statement, $mode = \PDO::ATTR_DEFAULT_FETCH_MODE, ...$fetch_mode_args): \PDOStatement|false
     {
         if(is_string($statement))
             $statement = $this->resolveSQLTablePrefix($statement);
 
-        return parent::query($statement, $mode, $arg3, $ctorargs);
+        return parent::query($statement, $mode, ...$fetch_mode_args);
     }
 
-    public function exec($statement)
+    public function exec($statement): int|false
     {
         if(is_string($statement))
             $statement = $this->resolveSQLTablePrefix($statement);
         parent::exec($statement);
     }
 
-    public function prepare($statement, $driver_options = [])
+    public function prepare($statement, $driver_options = []): \PDOStatement|false
     {
         if(is_string($statement))
             $statement = $this->resolveSQLTablePrefix($statement);
